@@ -1,14 +1,22 @@
 {
     "compilerOptions": {
-      "outDir": "./dist/script",
-      "noImplicitAny": true,
-      "lib": [
-          "es2015",
-          "dom",
-          "es2017"
-      ],
-      "module": "es6",
-      "target": "es5",
-      "allowJs": true,
-    }
+        "rootDir": "./src/scripts",
+        "outDir": "./dist/script",
+        "noImplicitAny": true,
+        "lib": [
+            "es2015",
+            "dom",
+            "es2017"
+        ],
+        "module": "es6",
+        "target": "es5",
+        "allowJs": true,
+        "removeComments": true
+    },
+    "include": [
+        "./src/scripts/**.ts"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
 }

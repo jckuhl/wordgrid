@@ -1,13 +1,15 @@
 import { random } from './utilities';
 import Square from './square';
 
-class Grid {
+export default class Grid {
+
+    readonly URL = 'https://words-project-breakpoint.firebaseio.com/words.json';
 
     private grid: HTMLElement;
     private words: string[] = [];
     private squares: Square[] = [];
 
-    private ABC_FREQ = {
+    readonly ABC_FREQ = {
         // tslint disabled here, as I want it sorted by frequency
         // tslint:disable-next-line:object-literal-sort-keys
         e: 11.1607, a: 8.4966, r: 7.5809, i: 7.5448,
@@ -24,7 +26,7 @@ class Grid {
         let ABC = this._createFreqArray();
         let count = 0;
         do {
-            let square = new Square(ABC[random(ABC.length)]);
+            let square = new Square(ABC[random(ABC.length)], count, this);
             this.grid.appendChild(square.getDiv());
             this.squares.push(square);
             count += 1;
@@ -44,9 +46,11 @@ class Grid {
     }
 
     public async play() {
-        this.words = await (await fetch('https://words-project-breakpoint.firebaseio.com/words.json')).json();
+        this.words = await (await fetch(this.URL)).json();
     }
 }
 
 const game = new Grid('#game');
 game.play();
+
+console.log('test');

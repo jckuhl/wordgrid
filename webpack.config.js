@@ -1,3 +1,5 @@
+//! DEPRECATED using grunt, keeping in case I revert to webpack for some reason
+
 const path = require('path');
 
 module.exports = {
