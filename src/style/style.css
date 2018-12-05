@@ -1,0 +1,47 @@
+:root {
+    --bg-color: skyblue;
+    --bg-container: rebeccapurple;
+    --bg-game: red;
+    --border-top-left: 4px solid rgba(0,0,0,0.25);
+    --border-bottom-right: 4px solid rgba(0,0,0,0.5);
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg-color);
+    box-sizing: content-box;
+}
+
+.grid-container {
+    margin: 0 auto;
+    height: auto;
+    width: 900px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    background: var(--bg-container);
+}
+
+.game-grid {
+    display: grid;
+    width: 1fr;
+    grid-template-rows: 1fr 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-column-start: 2;
+    background: var(--bg-game);
+}
+
+.game-square {
+    width: 100px;
+    height: 100px;
+    border-top: var(--border-top-left);
+    border-left: var(--border-top-left);
+    border-bottom: var(--border-bottom-right);
+    border-right: var(--border-bottom-right);
+    font-size: 3rem;
+    text-align: center;
+}
+
+.selected {
+    background: gold;
+}
