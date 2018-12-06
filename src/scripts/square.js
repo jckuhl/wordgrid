@@ -13,12 +13,7 @@ export default class Square {
         this.value = this._calcValue();
 
         this.div.addEventListener('click', ()=> {
-            if(this.selected) {
-                this.div.classList.remove('selected');
-            } else {
-                this.div.classList.add('selected');
-            }
-            this.selected = !this.selected;
+            this.parent.select(this);
         });
     }
 
@@ -47,5 +42,15 @@ export default class Square {
 
     getValue() {
         return this.value;
+    }
+
+    setClass(className) {
+        this.div.classList.add(className);
+        this.selected = true;
+    }
+
+    removeClass(className) {
+        this.div.classList.remove(className);
+        this.selected = false;
     }
 }
