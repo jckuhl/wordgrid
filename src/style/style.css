@@ -27,7 +27,7 @@ body {
     /* width of: 
         square (100px) * 4
         + border-width (4px) * 2 * 4
-        (top/bottom or left/right of each square border)
+        (top & bottom or left & right of each square border)
         = 432px
     */
     width: 432px;
@@ -36,6 +36,11 @@ body {
     grid-template-columns: 1fr 1fr 1fr 1fr;
     grid-column-start: 2;
     background: var(--bg-game);
+}
+
+.bonus {
+    position: relative;
+    font-size: 0.75rem;
 }
 
 .game-square {

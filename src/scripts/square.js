@@ -10,21 +10,38 @@ export default class Square {
         this.letter = letter;
         this.div.innerHTML = letter;
         this.selected = false;
-        this.value = this._calcValue();
+    }
 
-        this.div.addEventListener('mousedown', ()=> {
-            this.parent.select(this);
-        });
+    setBonus(bonus) {
+        
+        const colors = {
+            '2l': 'pink',
+            '3l': 'purple',
+            '2w': 'green',
+            '3w': 'yellow'
+        }
+
+        if(Object.keys(colors).includes(bonus)){
+            this.bonus = bonus
+            this.bonusDiv = document.createElement('div');
+            this.bonusDiv.innerHTML = this.bonus;
+            this.bonusDiv.classList.add('bonus');
+            this.bonusDiv.style.backgroundColor = colors[this.bonus];
+            this.div.appendChild(this.bonusDiv);
+        } else {
+            this.bonus = null;
+        }
+        this.value = this._calcValue();
     }
 
     _calcValue() {
         for(let key in LETTER_SCORES) {
             if(LETTER_SCORES.hasOwnProperty(key) && LETTER_SCORES[key].includes(this.letter.toUpperCase())) {
                 let value = parseInt(key);
-                if(this.bonus && this.bonus !== '') {
+                if(this.bonus) {
                     // this.bonus looks like: 2l where it means twice the points per that letter
                     // therefore the number is always the first
-                    // TODO: implement scores that affect entire word
+                    // 2w and 3w are implemented by Grid class because it involves entire word, not just square
                     value *= parseInt(this.bonus.split('')[0]);
                 }
                 return value;

@@ -1,4 +1,4 @@
-import { random } from './utilities.js';
+import { random, arrayShuffle } from './utilities.js';
 import { http } from './httpUtils.js';
 import { createFreqArray } from './words.js';
 import Square from './square.js';
@@ -21,6 +21,14 @@ export default class Grid {
             this.squares.push(square);
             count += 1;
         } while(count < 16);
+        let bonuses = ['3w', '2w', '2w', '3l', '2l', '2l'];
+        bonuses = arrayShuffle(bonuses.concat((new Array(10)).fill('', 0, 10)));
+        bonuses.forEach((bonus, index)=> {
+            this.squares[index].setBonus(bonus);
+        });
+        this.squares.forEach(square => {
+            square.div.addEventListener('click', this.select.bind(this, square));
+        })
         document.getElementById('submit').addEventListener('click', this.submitWord.bind(this));
     }
 
@@ -34,10 +42,18 @@ export default class Grid {
 
         const generateWordAndScore = ()=> {
             this.selectedWord = this.selectedLetters.map(square => square.letter).join('');
+            console.log(this.selectedLetters.map(square => square.value));
             this.currentScore = this.selectedLetters.reduce((accum, square) => {
                 return accum += square.value;
             }, 0);
-
+            const bonuses = this.selectedLetters
+                            .map(square => square.bonus)
+                            .filter(bonus => ['2w', '3w'].includes(bonus));
+            if(bonuses.length !== 0) {
+                this.currentScore = bonuses.reduce((accum, current)=> {
+                    return accum * parseInt(current.split('')[0]);
+                }, this.currentScore);
+            }
             const answer = document.getElementById('answer');
             answer.firstElementChild.innerHTML = `${this.selectedWord}, worth: ${this.currentScore}`;
         }
@@ -96,19 +112,24 @@ export default class Grid {
         if(this.words.includes(this.selectedWord) && this.selectedWord.length >= 2) {
             if(!this.usedWords.has(this.selectedWord)) {
                 this.appendToUsedList(this.selectedWord, this.currentScore);
+                this.status(`${this.selectedWord} scored ${this.currentScore}!`);
                 this.usedWords.add(this.selectedWord);
                 this.totalScore += this.currentScore;
                 document.querySelector('.totals').innerHTML = this.totalScore;
             } else {
-                console.log(`${this.selectedWord} is already used!`);
+                this.status(`${this.selectedWord} is already used!`);
             }
         } else {
-            console.log(`${this.selectedWord} is invalid!`);
+            this.status(`${this.selectedWord} is invalid!`);
         }
         this.currentScore = 0;
         this.selectedWord = '';
         this.selectedLetters = [];
         this.clear();
+    }
+
+    status(message) {
+        document.getElementById('status').innerHTML = message;
     }
 
     appendToUsedList(word, score) {
@@ -134,13 +155,13 @@ export default class Grid {
         if(!this.words) {
             this.words = await http.getWords();
         }
-        this.active = await this.loop();
-        this.clear();
-        this.grid.innerHTML = '';
-        const gameover = document.createElement('div');
-        gameover.classList.add('game-over');
-        gameover.innerHTML = `Total Score: ${this.totalScore}`;
-        this.grid.appendChild(gameover);
+        // this.active = await this.loop();
+        // this.clear();
+        // this.grid.innerHTML = '';
+        // const gameover = document.createElement('div');
+        // gameover.classList.add('game-over');
+        // gameover.innerHTML = `Total Score: ${this.totalScore}`;
+        // this.grid.appendChild(gameover);
     }
 }
 
