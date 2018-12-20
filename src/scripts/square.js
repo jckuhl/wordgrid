@@ -12,7 +12,7 @@ export default class Square {
         this.selected = false;
         this.value = this._calcValue();
 
-        this.div.addEventListener('click', ()=> {
+        this.div.addEventListener('mousedown', ()=> {
             this.parent.select(this);
         });
     }

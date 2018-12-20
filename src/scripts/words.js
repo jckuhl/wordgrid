@@ -17,3 +17,15 @@ export const LETTER_SCORES = {
     '8': ['J', 'X'],
     '10': ['Q', 'Z']
 }
+
+export function createFreqArray() {
+    // find the constant that sets q, the smallest value, to 1
+    const k = 1 / ABC_FREQ.q;
+    let letters = [];
+
+    // now multiply each letter in the array by timesing its frequency % by k.
+    Object.entries(ABC_FREQ).forEach(([letter, freq]) => {
+        letters = letters.concat(letter.repeat(freq * k).split(''));
+    });
+    return letters;
+}

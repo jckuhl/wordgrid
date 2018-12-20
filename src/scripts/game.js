@@ -1,16 +1,19 @@
 import { random } from './utilities.js';
 import { http } from './httpUtils.js';
-import { ABC_FREQ } from './words.js';
+import { createFreqArray } from './words.js';
 import Square from './square.js';
-import Answer from './answer.js';
 
 export default class Grid {
 
     constructor(selector) {
         this.grid = document.querySelector(selector);
         this.squares = [];
-        this.answer = new Answer('#answer', this);
-        let ABC = this._createFreqArray();
+        this.selectedLetters = [];
+        this.selectedWord = '';
+        this.currentScore = 0;
+        this.totalScore = 0;
+        this.usedWords = new Set();
+        let ABC = createFreqArray();
         let count = 0;
         do {
             let square = new Square(ABC[random(ABC.length)], count, this);
@@ -18,18 +21,7 @@ export default class Grid {
             this.squares.push(square);
             count += 1;
         } while(count < 16);
-    }
-
-    _createFreqArray() {
-        // find the constant that sets q, the smallest value, to 1
-        const k = 1 / ABC_FREQ.q;
-        let letters = [];
-
-        // now multiply each letter in the array by timesing its frequency % by k.
-        Object.entries(ABC_FREQ).forEach(([letter, freq]) => {
-            letters = letters.concat(letter.repeat(freq * k).split(''));
-        });
-        return letters;
+        document.getElementById('submit').addEventListener('click', this.submitWord.bind(this));
     }
 
     /**
@@ -39,12 +31,27 @@ export default class Grid {
      * @memberof Grid
      */
     select(square) {
+
+        const generateWordAndScore = ()=> {
+            this.selectedWord = this.selectedLetters.map(square => square.letter).join('');
+            this.currentScore = this.selectedLetters.reduce((accum, square) => {
+                return accum += square.value;
+            }, 0);
+
+            const answer = document.getElementById('answer');
+            answer.firstElementChild.innerHTML = `${this.selectedWord}, worth: ${this.currentScore}`;
+        }
+
         const selectSquare = ()=> { 
             square.setClass('selected');
-            this.answer.addLetter({
-                letter: square.getLetter(),
-                score: square.getValue(),
-            });
+            this.selectedLetters.push(square);
+            generateWordAndScore();
+        }
+
+        const deselectSquare = (square)=> {
+            square.removeClass('selected');
+            this.selectedLetters = this.selectedLetters.filter(sq => sq.key !== square.key);
+            generateWordAndScore();
         }
 
         const getNeighbor = (square) => {
@@ -61,7 +68,7 @@ export default class Grid {
         }
 
         if(square.selected) {
-            square.removeClass('selected');
+            deselectSquare(square);
         } else {
             const selectedSquares = this.squares.filter(square => square.selected === true);
             if(selectedSquares.length === 0) {
@@ -85,11 +92,57 @@ export default class Grid {
         });
     }
 
+    submitWord() {
+        if(this.words.includes(this.selectedWord) && this.selectedWord.length >= 2) {
+            if(!this.usedWords.has(this.selectedWord)) {
+                this.appendToUsedList(this.selectedWord, this.currentScore);
+                this.usedWords.add(this.selectedWord);
+                this.totalScore += this.currentScore;
+                document.querySelector('.totals').innerHTML = this.totalScore;
+            } else {
+                console.log(`${this.selectedWord} is already used!`);
+            }
+        } else {
+            console.log(`${this.selectedWord} is invalid!`);
+        }
+        this.currentScore = 0;
+        this.selectedWord = '';
+        this.selectedLetters = [];
+        this.clear();
+    }
+
+    appendToUsedList(word, score) {
+        const list = document.getElementById('usedWords');
+        const wordDiv = document.createElement('div');
+        wordDiv.innerHTML = word;
+        const scoreDiv = document.createElement('div');
+        scoreDiv.innerHTML = score;
+        list.appendChild(wordDiv);
+        list.appendChild(scoreDiv);
+    }
+
+    async loop() {
+        return new Promise((resolve, reject)=> {
+            setTimeout(()=> {
+                resolve(false);
+            }, 60 * 1000);
+        });
+    }
+
     async play() {
-        this.words = await http.getWords();
-        this.answer.populateWordBank(this.words);
+        this.active = true;
+        if(!this.words) {
+            this.words = await http.getWords();
+        }
+        this.active = await this.loop();
+        this.clear();
+        this.grid.innerHTML = '';
+        const gameover = document.createElement('div');
+        gameover.classList.add('game-over');
+        gameover.innerHTML = `Total Score: ${this.totalScore}`;
+        this.grid.appendChild(gameover);
     }
 }
 
-const game = new Grid('#game');
-game.play();
+window.game = new Grid('#game');
+window.game.play();
